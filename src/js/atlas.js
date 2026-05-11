@@ -359,49 +359,51 @@ function initAtlas(skills, graphData) {
             : ""
         }
 
+        <div class="atlas-actions">
+          <div class="atlas-source">
+            <button class="atlas-source-toggle" aria-expanded="false">
+              <span class="atlas-source-toggle-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+              <span class="atlas-source-toggle-label">
+                <span class="atlas-source-toggle-title">View source</span>
+                <span class="atlas-source-toggle-meta">SKILL.md · ${skill.bodyMarkdown.split('\n').length} lines · markdown</span>
+              </span>
+              <span class="atlas-source-toggle-action">Show</span>
+            </button>
+            <div class="atlas-source-panel" hidden>
+              <div class="atlas-source-header">
+                <span class="atlas-source-header-name">${escapeHtml(skill.slug)}/SKILL.md</span>
+                <button class="atlas-source-copy" aria-label="Copy markdown">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span>Copy</span>
+                </button>
+              </div>
+              <pre class="atlas-source-pre"><code class="atlas-source-code"></code></pre>
+            </div>
+          </div>
+
+          ${versionsIndex.versions.length > 1 ? `
+          <div class="atlas-compare">
+            <button class="atlas-compare-toggle" aria-expanded="false">
+              <span class="atlas-compare-toggle-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l5 5-5 5"/><path d="M8 21l-5-5 5-5"/><path d="M21 8H7a4 4 0 0 0-4 4"/><path d="M3 16h14a4 4 0 0 0 4-4"/></svg>
+              </span>
+              <span class="atlas-compare-toggle-label">
+                <span class="atlas-compare-toggle-title">Compare versions</span>
+                <span class="atlas-compare-toggle-meta">See what changed in /${skill.slug} across ${versionsIndex.versions.length} tracked versions</span>
+              </span>
+              <span class="atlas-source-toggle-action">Compare</span>
+            </button>
+            <div class="atlas-compare-panel" hidden></div>
+          </div>
+          ` : ""}
+        </div>
+
         <div class="atlas-section">
           <div class="atlas-section-title">Full documentation</div>
           <div class="atlas-body">${skill.bodyHtml}</div>
         </div>
-
-        <div class="atlas-source">
-          <button class="atlas-source-toggle" aria-expanded="false">
-            <span class="atlas-source-toggle-icon">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </span>
-            <span class="atlas-source-toggle-label">
-              <span class="atlas-source-toggle-title">View source</span>
-              <span class="atlas-source-toggle-meta">SKILL.md · ${skill.bodyMarkdown.split('\n').length} lines · markdown</span>
-            </span>
-            <span class="atlas-source-toggle-action">Show</span>
-          </button>
-          <div class="atlas-source-panel" hidden>
-            <div class="atlas-source-header">
-              <span class="atlas-source-header-name">${escapeHtml(skill.slug)}/SKILL.md</span>
-              <button class="atlas-source-copy" aria-label="Copy markdown">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                <span>Copy</span>
-              </button>
-            </div>
-            <pre class="atlas-source-pre"><code class="atlas-source-code"></code></pre>
-          </div>
-        </div>
-
-        ${versionsIndex.versions.length > 1 ? `
-        <div class="atlas-compare">
-          <button class="atlas-compare-toggle" aria-expanded="false">
-            <span class="atlas-compare-toggle-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l5 5-5 5"/><path d="M8 21l-5-5 5-5"/><path d="M21 8H7a4 4 0 0 0-4 4"/><path d="M3 16h14a4 4 0 0 0 4-4"/></svg>
-            </span>
-            <span class="atlas-compare-toggle-label">
-              <span class="atlas-compare-toggle-title">Compare versions</span>
-              <span class="atlas-compare-toggle-meta">See what changed in /${skill.slug} across ${versionsIndex.versions.length} tracked versions</span>
-            </span>
-            <span class="atlas-source-toggle-action">Compare</span>
-          </button>
-          <div class="atlas-compare-panel" hidden></div>
-        </div>
-        ` : ""}
       </div>
     `;
 

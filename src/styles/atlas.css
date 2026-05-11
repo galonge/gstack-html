@@ -611,9 +611,17 @@
 
 .atlas-body a:hover { border-color: var(--amber); }
 
+/* === Actions row (source + compare, above documentation) === */
+.atlas-actions {
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* === Source viewer (slide-down) === */
 .atlas-source {
-  margin-top: 32px;
+  /* margin handled by .atlas-actions */
 }
 
 .atlas-source-toggle {
@@ -771,7 +779,7 @@
 
 /* === Compare UI === */
 .atlas-compare {
-  margin-top: 32px;
+  /* margin handled by .atlas-actions */
 }
 
 .atlas-compare-toggle {
