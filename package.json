@@ -1,0 +1,16 @@
+{
+  "name": "gstack-html",
+  "version": "1.0.0",
+  "description": "Interactive visual documentation for gstack by Garry Tan",
+  "scripts": {
+    "build": "bun run build/build.ts",
+    "dev": "bun run build/build.ts && cd dist && python3 -m http.server 8080"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "marked": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9"
+  }
+}
