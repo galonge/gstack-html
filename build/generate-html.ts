@@ -2,12 +2,14 @@ import { readFile, writeFile, mkdir, cp } from "fs/promises";
 import { join } from "path";
 import type { SkillData } from "./parse-skills";
 import type { GraphData } from "./generate-graph-data";
+import type { VersionsIndex } from "./snapshot";
 
 export async function generateHtml(
   graphData: GraphData,
   skills: SkillData[],
   distDir: string,
-  srcDir: string
+  srcDir: string,
+  versionsIndex: VersionsIndex = { versions: [], current: "" }
 ): Promise<void> {
   await mkdir(distDir, { recursive: true });
   await mkdir(join(distDir, "assets"), { recursive: true });
@@ -43,6 +45,7 @@ export async function generateHtml(
   }))));
 
   const graphJson = escapeForScript(JSON.stringify(graphData));
+  const versionsJson = escapeForScript(JSON.stringify(versionsIndex));
 
   // Use function-form replacements to avoid $-pattern interpretation in replacement strings
   template = template
@@ -50,6 +53,7 @@ export async function generateHtml(
     .replace("{{INLINE_JS}}", () => jsContents.join("\n\n"))
     .replace("{{SKILLS_DATA}}", () => skillsJson)
     .replace("{{GRAPH_DATA}}", () => graphJson)
+    .replace("{{VERSIONS_INDEX}}", () => versionsJson)
     .replace(/\{\{VERSION\}\}/g, () => graphData.meta.version)
     .replace(/\{\{BUILD_DATE\}\}/g, () => graphData.meta.buildDate)
     .replace(/\{\{TOTAL_SKILLS\}\}/g, () => String(graphData.meta.totalSkills));

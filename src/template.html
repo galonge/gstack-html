@@ -97,6 +97,14 @@
     <section class="view view-atlas" data-view="atlas" hidden>
       <div class="atlas-container">
         <aside class="atlas-sidebar">
+          <div class="atlas-version-picker">
+            <button class="atlas-version-trigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="atlas-version-label">Version</span>
+              <span class="atlas-version-current"></span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="atlas-version-menu" role="listbox" hidden></div>
+          </div>
           <div class="atlas-sidebar-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
             <input type="text" class="atlas-filter-input" placeholder="Filter skills...">
@@ -118,6 +126,7 @@
   <script>
     window.__SKILLS_DATA__ = {{SKILLS_DATA}};
     window.__GRAPH_DATA__ = {{GRAPH_DATA}};
+    window.__VERSIONS_INDEX__ = {{VERSIONS_INDEX}};
   </script>
   <script>
 {{INLINE_JS}}

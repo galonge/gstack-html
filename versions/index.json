@@ -1,0 +1,96 @@
+{
+  "versions": [
+    {
+      "version": "1.32.0",
+      "fullVersion": "1.32.0.0",
+      "date": "2026-05-11",
+      "sha": "74895062fb8a3acbf9f66cd088a83359aaaa56cd",
+      "skillCount": 46
+    },
+    {
+      "version": "1.31.1",
+      "fullVersion": "1.31.1.0",
+      "date": "2026-05-10",
+      "sha": "49cc4ff9c99e9b24f39aa7dcbfc456e840be29a8",
+      "skillCount": 46
+    },
+    {
+      "version": "1.31.0",
+      "fullVersion": "1.31.0.0",
+      "date": "2026-05-09",
+      "sha": "5d4fe7df070fefb45f300144e1181cf43836bdd1",
+      "skillCount": 46
+    },
+    {
+      "version": "1.30.0",
+      "fullVersion": "1.30.0.0",
+      "date": "2026-05-09",
+      "sha": "00f966b3ec97b0deb7562bd92f51a86187032224",
+      "skillCount": 46
+    },
+    {
+      "version": "1.29.0",
+      "fullVersion": "1.29.0.0",
+      "date": "2026-05-08",
+      "sha": "06605477e25bf9b302888465baec132fa6093f39",
+      "skillCount": 46
+    },
+    {
+      "version": "1.28.0",
+      "fullVersion": "1.28.0.0",
+      "date": "2026-05-07",
+      "sha": "443bde054c6d8a0e608ec099b841d508c2fa4be5",
+      "skillCount": 46
+    },
+    {
+      "version": "1.27.1",
+      "fullVersion": "1.27.1.0",
+      "date": "2026-05-06",
+      "sha": "7b4738bca0d157c761894e548349cb85e61104ba",
+      "skillCount": 46
+    },
+    {
+      "version": "1.27.0",
+      "fullVersion": "1.27.0.0",
+      "date": "2026-05-06",
+      "sha": "f44de365c55c78f9dcb0b26f40647d82d9c93706",
+      "skillCount": 46
+    },
+    {
+      "version": "1.26.5",
+      "fullVersion": "1.26.5.0",
+      "date": "2026-05-06",
+      "sha": "c7aefc1abd57733848f24ee84b85d691b2973155",
+      "skillCount": 46
+    },
+    {
+      "version": "1.26.4",
+      "fullVersion": "1.26.4.0",
+      "date": "2026-05-05",
+      "sha": "19e699ab9b69de9e1bf10d4b7c2682703b56f984",
+      "skillCount": 46
+    },
+    {
+      "version": "1.26.3",
+      "fullVersion": "1.26.3.0",
+      "date": "2026-05-04",
+      "sha": "db9447c3339950bb0506c547e5b3225f5def3854",
+      "skillCount": 46
+    },
+    {
+      "version": "1.26.2",
+      "fullVersion": "1.26.2.0",
+      "date": "2026-05-03",
+      "sha": "30fe6bb11c6915e6264440b8a044ed0dcfbe06e0",
+      "skillCount": 45
+    },
+    {
+      "version": "1.26.1",
+      "fullVersion": "1.26.1.0",
+      "date": "2026-05-03",
+      "sha": "a0bfa001d3e10c14bca724046fc319d28f07c64b",
+      "skillCount": 45
+    }
+  ],
+  "current": "1.32.0"
+}

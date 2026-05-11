@@ -36,7 +36,13 @@ jobs:
       - name: Check upstream for changes
         id: check
         run: |
-          git clone --depth 1 https://github.com/garrytan/gstack.git upstream/gstack
+          # Clone with full history so backfill can walk git log (first time only)
+          if [ -d versions ] && [ -f versions/index.json ]; then
+            DEPTH_FLAG="--depth 1"
+          else
+            DEPTH_FLAG=""
+          fi
+          git clone $DEPTH_FLAG https://github.com/garrytan/gstack.git upstream/gstack
           UPSTREAM_SHA=$(git -C upstream/gstack rev-parse HEAD)
           UPSTREAM_VERSION=$(cat upstream/gstack/VERSION 2>/dev/null || echo "unknown")
 
@@ -55,18 +61,21 @@ jobs:
             echo "Upstream changed: $UPSTREAM_SHA (was $LAST_SHA)"
           fi
 
-      - name: Build site
+      - name: Build site (with version snapshots)
         if: steps.check.outputs.changed == 'true' || github.event_name != 'schedule'
         run: USE_UPSTREAM=1 bun run build
 
-      - name: Track upstream SHA
+      - name: Commit version snapshots and SHA tracker
         if: steps.check.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .last-upstream-sha
-          git diff --staged --quiet || git commit -m "track: upstream gstack $(cat .last-upstream-sha | head -c 7)"
-          git push || true
+          git add .last-upstream-sha versions/
+          if ! git diff --staged --quiet; then
+            VER=$(cat upstream/gstack/VERSION 2>/dev/null || echo "?")
+            git commit -m "track: upstream gstack v${VER} ($(cat .last-upstream-sha | head -c 7))"
+            git push || true
+          fi
 
       - name: Configure Pages
         if: steps.check.outputs.changed == 'true' || github.event_name != 'schedule'
