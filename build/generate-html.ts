@@ -14,10 +14,13 @@ export async function generateHtml(
 
   let template = await readFile(join(srcDir, "template.html"), "utf-8");
 
-  const mainCss = await readFile(join(srcDir, "styles", "main.css"), "utf-8");
-  const graphCss = await readFile(join(srcDir, "styles", "graph.css"), "utf-8");
+  const cssFiles = ["main.css", "story.css", "flow.css", "atlas.css"];
+  const cssContents: string[] = [];
+  for (const f of cssFiles) {
+    cssContents.push(await readFile(join(srcDir, "styles", f), "utf-8"));
+  }
 
-  const jsFiles = ["workflow.js", "graph.js", "detail-panel.js", "search.js", "app.js"];
+  const jsFiles = ["story.js", "flow.js", "atlas.js", "app.js"];
   const jsContents: string[] = [];
   for (const f of jsFiles) {
     jsContents.push(await readFile(join(srcDir, "js", f), "utf-8"));
@@ -43,7 +46,7 @@ export async function generateHtml(
 
   // Use function-form replacements to avoid $-pattern interpretation in replacement strings
   template = template
-    .replace("{{INLINE_CSS}}", () => mainCss + "\n" + graphCss)
+    .replace("{{INLINE_CSS}}", () => cssContents.join("\n\n"))
     .replace("{{INLINE_JS}}", () => jsContents.join("\n\n"))
     .replace("{{SKILLS_DATA}}", () => skillsJson)
     .replace("{{GRAPH_DATA}}", () => graphJson)

@@ -1,46 +1,22 @@
-// App orchestrator — initializes all modules after DOM ready
+// App router — tabs, URL hash, cmd+K search
 
 (function () {
   const skills = window.__SKILLS_DATA__;
   const graphData = window.__GRAPH_DATA__;
 
   function boot() {
-    // Initialize particle background
-    initParticles();
+    initTabs();
+    initSearchOverlay();
+    formatBuildDate();
 
-    // Initialize workflow pipeline
-    if (typeof initWorkflow === "function") {
-      initWorkflow(graphData);
-    }
+    if (typeof initStory === "function") initStory(skills, graphData);
+    if (typeof initFlow === "function") initFlow(skills, graphData);
+    if (typeof initAtlas === "function") initAtlas(skills, graphData);
 
-    // Initialize D3 graph
-    if (typeof initGraph === "function") {
-      initGraph(graphData, skills);
-    }
+    // Resolve initial route from URL hash
+    handleRoute();
 
-    // Initialize detail panel
-    if (typeof initDetailPanel === "function") {
-      initDetailPanel(skills, graphData);
-    }
-
-    // Initialize search
-    if (typeof initSearch === "function") {
-      initSearch(skills);
-    }
-
-    // View toggle
-    initViewToggle();
-
-    // Format build date
-    const timeEl = document.querySelector(".footer-updated time");
-    if (timeEl) {
-      const d = new Date(timeEl.textContent);
-      timeEl.textContent = d.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    }
+    window.addEventListener("hashchange", handleRoute);
   }
 
   if (document.readyState === "loading") {
@@ -49,90 +25,204 @@
     boot();
   }
 
-  function initViewToggle() {
-    const toggleBtn = document.querySelector(".view-toggle-btn");
-    const graphContainer = document.querySelector(".graph-container");
-    const cardsContainer = document.querySelector(".cards-container");
-    const headerToggle = document.querySelector(".header-nav .view-toggle");
+  function initTabs() {
+    document.querySelectorAll(".tab[data-view]").forEach((tab) => {
+      tab.addEventListener("click", (e) => {
+        e.preventDefault();
+        const view = tab.dataset.view;
+        navigateTo(view);
+      });
+    });
+  }
 
-    if (!toggleBtn || !graphContainer || !cardsContainer) return;
+  function navigateTo(view, subpath) {
+    const newHash = subpath ? `#${view}/${subpath}` : `#${view}`;
+    if (location.hash !== newHash) {
+      location.hash = newHash;
+    } else {
+      handleRoute();
+    }
+  }
 
-    const stored = localStorage.getItem("gstack-view") || "graph";
-    setView(stored);
+  window.gstackNavigate = navigateTo;
 
-    toggleBtn.addEventListener("click", () => {
-      const current = toggleBtn.dataset.current;
-      setView(current === "graph" ? "cards" : "graph");
+  function handleRoute() {
+    const hash = location.hash.replace(/^#/, "") || "story";
+    const [view, ...rest] = hash.split("/");
+    const validViews = ["story", "flow", "atlas"];
+    const targetView = validViews.includes(view) ? view : "story";
+
+    setActiveView(targetView);
+
+    // Dispatch sub-route to view handlers
+    const subpath = rest.join("/");
+    window.dispatchEvent(new CustomEvent("gstack:route", {
+      detail: { view: targetView, subpath }
+    }));
+  }
+
+  function setActiveView(view) {
+    document.body.dataset.view = view;
+
+    document.querySelectorAll(".tab[data-view]").forEach((tab) => {
+      const isActive = tab.dataset.view === view;
+      tab.setAttribute("aria-selected", isActive ? "true" : "false");
     });
 
-    if (headerToggle) {
-      headerToggle.addEventListener("click", () => {
-        const current = toggleBtn.dataset.current;
-        setView(current === "graph" ? "cards" : "graph");
-      });
-    }
+    document.querySelectorAll(".view[data-view]").forEach((section) => {
+      const isActive = section.dataset.view === view;
+      section.hidden = !isActive;
+    });
 
-    function setView(view) {
-      toggleBtn.dataset.current = view;
-      localStorage.setItem("gstack-view", view);
-
-      const graphLabel = toggleBtn.querySelector(".toggle-graph");
-      const cardsLabel = toggleBtn.querySelector(".toggle-cards");
-
-      if (view === "graph") {
-        graphContainer.hidden = false;
-        cardsContainer.hidden = true;
-        graphLabel.classList.add("active");
-        cardsLabel.classList.remove("active");
-        if (headerToggle) headerToggle.querySelector(".view-toggle-label").textContent = "Cards";
-      } else {
-        graphContainer.hidden = true;
-        cardsContainer.hidden = false;
-        graphLabel.classList.remove("active");
-        cardsLabel.classList.add("active");
-        if (headerToggle) headerToggle.querySelector(".view-toggle-label").textContent = "Graph";
-        renderCards();
+    // Scroll to top on tab change (fall back to legacy scrollTo if behavior:instant unsupported)
+    if (view !== "story") {
+      try {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      } catch {
+        window.scrollTo(0, 0);
       }
+      window.scrollTo(0, 0);
+    }
+  }
+
+  // === cmd+K Search Overlay ===
+  function initSearchOverlay() {
+    const overlay = document.querySelector(".search-overlay");
+    const input = document.querySelector(".search-overlay-input");
+    const results = document.querySelector(".search-overlay-results");
+    const trigger = document.querySelector(".search-trigger");
+
+    if (!overlay || !input || !results) return;
+
+    function open() {
+      overlay.hidden = false;
+      overlay.classList.add("visible");
+      setTimeout(() => input.focus(), 30);
     }
 
-    function renderCards() {
-      const grid = document.querySelector(".cards-grid");
-      if (!grid || grid.children.length > 0) return;
+    function close() {
+      overlay.classList.remove("visible");
+      overlay.hidden = true;
+      input.value = "";
+      results.innerHTML = "";
+    }
 
-      const categories = graphData.categories;
+    trigger?.addEventListener("click", open);
 
-      skills.forEach((skill) => {
-        const node = graphData.nodes.find((n) => n.id === skill.slug);
-        const cat = node ? node.category : "Utilities";
-        const catColor = categories[cat]?.color || "#6B7280";
+    document.addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        if (overlay.hidden) open(); else close();
+      } else if (e.key === "Escape" && !overlay.hidden) {
+        close();
+      }
+    });
 
-        const card = document.createElement("div");
-        card.className = "skill-card";
-        card.style.setProperty("--cat-color", catColor);
-        card.dataset.slug = skill.slug;
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
 
-        card.innerHTML = `
-          <div class="skill-card-header">
-            <span class="skill-card-name">${skill.name}</span>
-            ${skill.preambleTier ? `<span class="skill-card-tier">tier ${skill.preambleTier}</span>` : ""}
-          </div>
-          <div class="skill-card-desc">${escapeHtml(skill.description)}</div>
-          <div class="skill-card-triggers">
-            ${skill.triggers
-              .slice(0, 3)
-              .map((t) => `<span class="trigger-tag">${escapeHtml(t)}</span>`)
-              .join("")}
+    let activeIdx = -1;
+
+    input.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      activeIdx = -1;
+      if (!q) {
+        results.innerHTML = "";
+        return;
+      }
+
+      const matches = scoreSkills(q);
+      if (matches.length === 0) {
+        results.innerHTML = `<div class="search-empty">No skills match "${escapeHtml(q)}"</div>`;
+        return;
+      }
+
+      results.innerHTML = matches
+        .slice(0, 8)
+        .map((m, i) => {
+          const node = graphData.nodes.find((n) => n.id === m.skill.slug);
+          const catColor = graphData.categories[node?.category]?.color || "#6B7280";
+          return `
+          <div class="search-result" data-slug="${m.skill.slug}" data-idx="${i}">
+            <span class="search-result-dot" style="background:${catColor}"></span>
+            <div class="search-result-text">
+              <div class="search-result-name">/${escapeHtml(m.skill.name)}</div>
+              <div class="search-result-desc">${escapeHtml(m.skill.description.slice(0, 80))}</div>
+            </div>
+            <span class="search-result-view">Atlas</span>
           </div>
         `;
+        })
+        .join("");
 
-        card.addEventListener("click", () => {
-          if (typeof openDetailPanel === "function") {
-            openDetailPanel(skill.slug);
-          }
+      results.querySelectorAll(".search-result").forEach((el) => {
+        el.addEventListener("click", () => {
+          navigateTo("atlas", el.dataset.slug);
+          close();
         });
-
-        grid.appendChild(card);
       });
+    });
+
+    input.addEventListener("keydown", (e) => {
+      const items = results.querySelectorAll(".search-result");
+      if (!items.length) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIdx = Math.min(activeIdx + 1, items.length - 1);
+        updateActive();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIdx = Math.max(activeIdx - 1, 0);
+        updateActive();
+      } else if (e.key === "Enter" && activeIdx >= 0) {
+        e.preventDefault();
+        items[activeIdx].click();
+      }
+
+      function updateActive() {
+        items.forEach((it, i) => it.classList.toggle("active", i === activeIdx));
+        items[activeIdx]?.scrollIntoView({ block: "nearest" });
+      }
+    });
+  }
+
+  function scoreSkills(q) {
+    return skills
+      .map((skill) => {
+        let score = 0;
+        const name = skill.name.toLowerCase();
+        const slug = skill.slug.toLowerCase();
+        const desc = skill.description.toLowerCase();
+
+        if (name === q || slug === q) score += 20;
+        if (name.startsWith(q) || slug.startsWith(q)) score += 10;
+        if (name.includes(q) || slug.includes(q)) score += 6;
+        if (desc.includes(q)) score += 2;
+
+        for (const t of skill.triggers) {
+          if (t.toLowerCase().includes(q)) { score += 4; break; }
+        }
+        for (const tool of skill.allowedTools) {
+          if (tool.toLowerCase().includes(q)) { score += 1; break; }
+        }
+
+        return { skill, score };
+      })
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score);
+  }
+
+  function formatBuildDate() {
+    const timeEl = document.querySelector(".footer-updated time");
+    if (timeEl) {
+      try {
+        const d = new Date(timeEl.textContent);
+        timeEl.textContent = d.toLocaleDateString("en-US", {
+          year: "numeric", month: "long", day: "numeric"
+        });
+      } catch {}
     }
   }
 
@@ -140,77 +230,5 @@
     const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
-  }
-
-  // Particle background
-  function initParticles() {
-    const canvas = document.querySelector(".particle-canvas");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-
-    function resize() {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      canvas.style.width = rect.width + "px";
-      canvas.style.height = rect.height + "px";
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    }
-    resize();
-
-    const particles = [];
-    const count = 60;
-    const rect = canvas.parentElement.getBoundingClientRect();
-
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * rect.width,
-        y: Math.random() * rect.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        r: Math.random() * 2 + 1,
-      });
-    }
-
-    function draw() {
-      const w = rect.width;
-      const h = rect.height;
-      ctx.clearRect(0, 0, w, h);
-
-      // Draw connections
-      ctx.strokeStyle = "rgba(245, 158, 11, 0.06)";
-      ctx.lineWidth = 1;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Draw particles
-      for (const p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
-        ctx.fill();
-
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
-      }
-
-      requestAnimationFrame(draw);
-    }
-    draw();
-
-    window.addEventListener("resize", resize);
   }
 })();
