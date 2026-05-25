@@ -1,6 +1,13 @@
 {
   "versions": [
     {
+      "version": "1.44.0",
+      "fullVersion": "1.44.0.0",
+      "date": "2026-05-25",
+      "sha": "920a13a17f463c28a3db75cc27482affb13a4fee",
+      "skillCount": 52
+    },
+    {
       "version": "1.43.3",
       "fullVersion": "1.43.3.0",
       "date": "2026-05-22",
@@ -148,5 +155,5 @@
       "skillCount": 45
     }
   ],
-  "current": "1.43.3"
+  "current": "1.44.0"
 }
